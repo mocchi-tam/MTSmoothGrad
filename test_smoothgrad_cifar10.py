@@ -169,13 +169,15 @@ class MTModel():
                     gd = np.sum(np.absolute(gd), axis=0)
                     total_gradients += gd
                 
-                dst_max = np.max(total_gradients)
-                dst = ((total_gradients/dst_max)*255).astype(np.uint8)
-                img1 = cv2.cvtColor(img_org.transpose(1,2,0), cv2.COLOR_BGR2RGB)
-                img2 = cv2.applyColorMap(dst, cv2.COLORMAP_JET)
+                total_grad = np.sum(np.absolute(x_tile.grad),axis=(0,1))
+                grad_max = np.max(total_grad)
+                grad = ((total_grad/grad_max)*255).astype(np.uint8)
                 
-                img2 = cv2.GaussianBlur(img2,(3,3),0)
+                img1 = cv2.cvtColor(img_org.transpose(1,2,0), cv2.COLOR_BGR2RGB)
                 img1 = cv2.resize(img1, (320,320))
+                
+                img2 = cv2.applyColorMap(grad, cv2.COLORMAP_JET)
+                img2 = cv2.GaussianBlur(img2,(3,3),0)
                 img2 = cv2.resize(img2, (320,320))
                 
                 img_h = cv2.hconcat([img1, img2])
