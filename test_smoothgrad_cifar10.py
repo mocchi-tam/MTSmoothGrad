@@ -162,12 +162,6 @@ class MTModel():
                     
                     x_tile.zerograd()
                     loss.backward()
-                    
-                total_gradients = np.zeros_like(x[0][0])
-                for n in range(self.N_sample):
-                    gd = x_tile.grad[n]
-                    gd = np.sum(np.absolute(gd), axis=0)
-                    total_gradients += gd
                 
                 total_grad = np.sum(np.absolute(x_tile.grad),axis=(0,1))
                 grad_max = np.max(total_grad)
