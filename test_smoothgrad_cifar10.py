@@ -128,8 +128,8 @@ class MTModel():
                 loss.backward()
                 self.optimizer.update()
                 
-                sum_loss += float(loss.data) * len(t.data)
-                sum_accuracy += float(self.model.accuracy.data) * len(t.data)
+                sum_loss += float(loss.data) * len(t)
+                sum_accuracy += float(self.model.accuracy.data) * len(t)
             
             # test phase
             if self.train_iter.is_new_epoch:
