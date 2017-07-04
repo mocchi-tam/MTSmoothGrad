@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--resume', '-r', type=int, default=-1,
                         help='If positive, resume the training from snapshot')
     
-    parser.add_argument('--noise', '-n', type=int, default=0.3,
+    parser.add_argument('--noise', '-n', type=float, default=0.3,
                         help='SmoothGrad : sigma of Gaussian kernel')
     parser.add_argument('--sample', '-s', type=int, default=100,
                         help='SmoothGrad : number of samples')
@@ -114,6 +114,7 @@ class MTModel():
                                                           repeat=False, shuffle=False)
         
     def run(self):
+        xp = np if self.gpu < 0 else chainer.cuda.cupy
         sum_accuracy = 0
         sum_loss = 0
         
@@ -148,11 +149,11 @@ class MTModel():
                     f = self.model.predict(x)
                 t = F.argmax(f).data
                 
-                img_org = (x[0]*255).astype(np.uint8)
-                stdev = self.noise * (np.max(x) - np.min(x))
+                img_org = (x[0]*255).astype(xp.uint8)
+                stdev = self.noise * (xp.max(x) - xp.min(x))
                 
-                x_tile = np.tile(x, (self.N_sample,1,1,1))
-                noise = np.random.normal(0, stdev, x_tile.shape).astype(np.float32)
+                x_tile = xp.tile(x, (self.N_sample,1,1,1))
+                noise = xp.random.normal(0, stdev, x_tile.shape).astype(xp.float32)
                 x_tile = x_tile + noise
                 t = np.tile(t, self.N_sample)
                 
@@ -163,9 +164,11 @@ class MTModel():
                     x_tile.zerograd()
                     loss.backward()
                 
-                total_grad = np.sum(np.absolute(x_tile.grad),axis=(0,1))
-                grad_max = np.max(total_grad)
-                grad = ((total_grad/grad_max)*255).astype(np.uint8)
+                total_grad = xp.sum(xp.absolute(x_tile.grad),axis=(0,1))
+                grad_max = xp.max(total_grad)
+                grad = ((total_grad/grad_max)*255).astype(xp.uint8)
+                if self.gpu >= 0:
+                    grad = chainer.cuda.to_cpu(grad)
                 
                 img1 = cv2.cvtColor(img_org.transpose(1,2,0), cv2.COLOR_BGR2RGB)
                 img1 = cv2.resize(img1, (320,320))
@@ -175,7 +178,7 @@ class MTModel():
                 img2 = cv2.resize(img2, (320,320))
                 
                 img_h = cv2.hconcat([img1, img2])
-                fname = 'img/img_sg.png'
+                fname = 'img_sg.png'
                 cv2.imwrite(fname, img_h)
                 
                 self.test_iter.reset()
