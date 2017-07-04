@@ -153,7 +153,7 @@ class MTModel():
                 x_tile = xp.tile(x, (self.N_sample,1,1,1))
                 noise = xp.random.normal(0, stdev, x_tile.shape).astype(xp.float32)
                 x_tile = x_tile + noise
-                t = np.tile(t, self.N_sample)
+                t = xp.tile(t, self.N_sample)
                 
                 with chainer.using_config('train', False):
                     x_tile = chainer.Variable(x_tile)
