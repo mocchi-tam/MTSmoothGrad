@@ -147,7 +147,7 @@ class MTModel():
                     f = self.model.predict(x)
                 t = F.argmax(f).data
                 
-                img_org = (x[0]*255).astype(xp.uint8)
+                img_org = (x[0]*255).astype(np.uint8)
                 stdev = self.noise * (xp.max(x) - xp.min(x))
                 
                 x_tile = xp.tile(x, (self.N_sample,1,1,1))
