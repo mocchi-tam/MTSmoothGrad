@@ -147,7 +147,7 @@ class MTModel():
                     f = self.model.predict(x)
                 t = F.argmax(f).data
                 
-                img_org = (x[0]*255).astype(np.uint8)
+                img_org = (x[0]*255).astype(xp.uint8)
                 stdev = self.noise * (xp.max(x) - xp.min(x))
                 
                 x_tile = xp.tile(x, (self.N_sample,1,1,1))
@@ -166,6 +166,7 @@ class MTModel():
                 grad_max = xp.max(total_grad)
                 grad = ((total_grad/grad_max)*255).astype(xp.uint8)
                 if self.gpu >= 0:
+                    img_org = chainer.cuda.to_cpu(img_org)
                     grad = chainer.cuda.to_cpu(grad)
                 
                 img1 = cv2.cvtColor(img_org.transpose(1,2,0), cv2.COLOR_BGR2RGB)
